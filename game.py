@@ -32,7 +32,11 @@ def process_plays(data, players):
     for play in plays:
         process_play_with_logging(play, players)
 
-def process_game(gameId):
+def save_players(repo, gameId, players):
+    for _, player in players.items():
+        repo.insert_player_game(gameId, player)
+
+def process_game(repo, gameId):
     data = get_game_data(gameId)
         
     if data is None:
@@ -42,6 +46,8 @@ def process_game(gameId):
     players = get_players(data)
         
     process_plays(data, players)
+
+    save_players(repo, gameId, players)
 
     if len(players) == 0:
         print('Game no played yet!')
