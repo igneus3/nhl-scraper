@@ -21,92 +21,60 @@ class PlayType(IntEnum):
     DELAYED_PENALTY = 535
     FAILED_SHOT_ATTEMPT = 537
 
-def get_playerId_maybe(play, key):
-    result = None
+def update_player_stat(play, players, player_key, player_update_func):
+    player_id = None
+    if 'details' in play and player_key in play['details']:
+        player_id = play['details'][player_key]
 
-    if 'details' in play and key in play['details']:
-        result = play['details'][key]
-
-    return result
-
-def update_player_maybe(playerId, players, update):
-    if playerId is not None:
-        players[playerId].call(update)
+    if player_id is not None:
+        players[player_id].call(player_update_func)
 
 def process_play(play, players):
     match play['typeCode']:
 
         case PlayType.FACEOFF:
-            winner = get_playerId_maybe(play, 'winningPlayerId')
-            update_player_maybe(winner, players, 'add_faceoff_win')
-
-            loser = get_playerId_maybe(play, 'losingPlayerId')
-            update_player_maybe(loser, players, 'add_faceoff_loss')
+            update_player_stat(play, players, 'winningPlayerId', 'add_faceoff_win')
+            update_player_stat(play, players, 'losingPlayerId', 'add_faceoff_loss')
 
         case PlayType.SHOT_ON_GOAL:
-            shooter = get_playerId_maybe(play, 'shootingPlayerId')
-            update_player_maybe(shooter, players, 'add_shot_on_goal')
-
+            update_player_stat(play, players, 'shootingPlayerId', 'add_shot_on_goal')
             goalie = get_playerId_maybe(play, 'goalieInNetId')
             # TODO: Add goalie stats
 
         case PlayType.TAKEAWAY:
-            taker = get_playerId_maybe(play, 'playerId')
-            update_player_maybe(taker, players, 'add_takeaway')
+            update_player_stat(play, players, 'playerId', 'add_takeaway')
 
         case PlayType.PENALTY:
-            committer = get_playerId_maybe(play, 'committedByPlayerId') 
-            update_player_maybe(committer, players, 'add_penalty_committed')
-
-            drawer = get_playerId_maybe(play, 'drawnByPlayerId') 
-            update_player_maybe(drawer, players, 'add_penalty_drawn')
-
-            server = get_playerId_maybe(play, 'servedByPlayerId') 
-            update_player_maybe(server, players, 'add_penalty_served')
+            update_player_stat(play, players, 'committedByPlayerId', 'add_penalty_committed') 
+            update_player_stat(play, players, 'drawnByPlayerId', 'add_penalty_drawn') 
+            update_player_stat(play, players, 'servedByPlayerId', 'add_penalty_served') 
 
         case PlayType.MISSED_SHOT:
-            shooter = get_playerId_maybe(play, 'shootingPlayerId')
-            update_player_maybe(shooter, players, 'add_missed_shot')
-
+            update_player_stat(play, players, 'shootingPlayerId', 'add_missed_shot')
             goalie = get_playerId_maybe(play, 'goalieInNetId')
             # TODO: Add goalie stats
 
         case PlayType.BLOCKED_SHOT:
-            shooter = get_playerId_maybe(play, 'shootingPlayerId')
-            update_player_maybe(shooter, players, 'add_shot')
-
-            blocker = get_playerId_maybe(play, 'blockingPlayerId')
-            update_player_maybe(blocker, players, 'add_blocked_shot')
+            update_player_stat(play, players, 'shootingPlayerId', 'add_shot')
+            update_player_stat(play, players, 'blockingPlayerId', 'add_blocked_shot')
 
         case PlayType.HIT:
-            hitter = get_playerId_maybe(play, 'hittingPlayerId')
-            update_player_maybe(hitter, players, 'add_hit_given')
-
-            hittee = get_playerId_maybe(play, 'hitteePlayerId')
-            update_player_maybe(hittee, players, 'add_hit_received')
+            update_player_stat(play, players, 'hittingPlayerId', 'add_hit_given')
+            update_player_stat(play, players, 'hitteePlayerId', 'add_hit_received')
 
         case PlayType.GOAL:
-            scorer = get_playerId_maybe(play, 'scoringPlayerId')
-            update_player_maybe(scorer, players, 'add_goal')
-
-            assist1 = get_playerId_maybe(play, 'assist1PlayerId')
-            update_player_maybe(assist1, players, 'add_primary_assist')
-
-            assist2 = get_playerId_maybe(play, 'assist2PlayerId')
-            update_player_maybe(assist1, players, 'add_secondary_assist')
-
+            update_player_stat(play, players, 'scoringPlayerId', 'add_goal')
+            update_player_stat(play, players, 'assist1PlayerId', 'add_primary_assist')
+            update_player_stat(play, players, 'assist2PlayerId', 'add_secondary_assist')
             goalie = get_playerId_maybe(play, 'goalieInNetId')
             # TODO: Add goalie stats
             # if goalie is not None:
 
         case PlayType.GIVEAWAY:
-            giver = get_playerId_maybe(play, 'playerId')
-            update_player_maybe(giver, players, 'add_giveaway')
+            update_player_stat(play, players, 'playerId', 'add_giveaway')
 
         case PlayType.FAILED_SHOT_ATTEMPT:
-            shooter = get_playerId_maybe(play, 'shootingPlayerId')
-            update_player_maybe(shooter, players, 'add_so_failed_shot')
-
+            update_player_stat(play, players, 'shootingPlayerId', 'add_so_failed_shot')
             goalie = get_playerId_maybe(play, 'goalieInNetId')
             # TODO: Add goalie stats
 
