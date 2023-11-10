@@ -19,10 +19,27 @@ def initialize_db():
     )
     """
 
+    plays_table = """
+    CREATE TABLE IF NOT EXISTS plays(
+        game_id INTEGER REFERENCES games(id),
+        event_id INTEGER NOT NULL,
+        period INTEGER NOT NULL,
+        period_type TEXT NOT NULL,
+        time_in_period TEXT NOT NULL,
+        time_remaining TEXT NOT NULL,
+        home_team_defending_side TEXT NOT NULL,
+        type_code INTEGER NOT NULL,
+        type_desc_key TEXT NOT NULL,
+        details TEXT,
+
+        PRIMARY KEY (game_id, event_id)
+    )
+    """
+
     player_games_table = """
     CREATE TABLE IF NOT EXISTS player_games(
-        gameId INTEGER REFERENCES games(id),
-        playerId INTEGER REFERENCES players(id),
+        game_id INTEGER REFERENCES games(id),
+        player_id INTEGER REFERENCES players(id),
         assists INTEGER DEFAULT 0,
         blocked_shots INTEGER DEFAULT 0,
         faceoff_wins INTEGER DEFAULT 0,
@@ -44,11 +61,11 @@ def initialize_db():
         so_shots INTEGER DEFAULT 0,
         takeaways INTEGER DEFAULT 0,
 
-        PRIMARY KEY (gameId, playerId)
+        PRIMARY KEY (game_id, player_id)
     )
     """
 
-    tables = [games_table, players_table, player_games_table]
+    tables = [games_table, players_table, plays_table, player_games_table]
 
     con = sqlite3.connect('nhl.db')
     cur = con.cursor()

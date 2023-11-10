@@ -12,12 +12,20 @@ class NhlRepository:
     def __exit__(self, exec_type, exec_value, traceback):
         self.connection.close()
 
-    def insert_player_game(self, gameId, player):
-        insert_statement = """
+    def __execute_insert(self, statement, params):
+        cursor = self.connection.cursor()
+
+        cursor.execute(statement, params)
+        self.connection.commit()
+
+        cursor.close()
+
+    def insert_player_game(self, game_id, player):
+        statement = """
         INSERT INTO player_games
         (
-            gameId,
-            playerId,
+            game_id,
+            player_id,
             assists,
             blocked_shots,
             faceoff_wins,
@@ -41,7 +49,7 @@ class NhlRepository:
         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """
         params = (
-            gameId, player.playerId, player.assists, player.blocked_shots,
+            game_id, player.player_id, player.assists, player.blocked_shots,
             player.faceoff_wins, player.faceoffs, player.giveaways, player.goals,
             player.hits_given, player.hits_received, player.missed_shots, player.penalties_committed,
             player.penalties_drawn, player.penalties_served, player.primary_assists, player.saves,
@@ -49,10 +57,35 @@ class NhlRepository:
             player.so_shots, player.takeaways
         )
 
-        cursor = self.connection.cursor()
+        self.__execute_insert(statement, params)
 
-        cursor.execute(insert_statement, params)
-        self.connection.commit()
+    def insert_play(self, game_id, play):
+        statement = """
+        INSERT INTO plays
+        (
+            game_id,
+            event_id,
+            period,
+            period_type,
+            time_in_period,
+            time_remaining,
+            home_team_defending_side,
+            type_code,
+            type_desc_key,
+            details
+        )
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """
+        params = (
+           game_id, play['eventId'], play['period'], play['periodDescriptor']['periodType'],
+           play['timeInPeriod'], play['timeRemaining'], play['homeTeamDefendingSide'], play['typeCode'],
+           play['typeDescKey']
+        )
 
-        cursor.close()
+        if 'details' in play:
+            params += (json.dumps(play['details']),)
+        else:
+            params += (None,)
+
+        self.__execute_insert(statement, params)
 

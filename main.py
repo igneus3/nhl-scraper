@@ -2,15 +2,15 @@ from db import NhlRepository
 from game import process_game
                   
 def main():
-    gameProcessed = True
-    gameId = 2023020001
+    game_processed = True
+    game_id = 2023020001
 
     with NhlRepository() as repo:
-        while gameProcessed:
-            print(f'Started processing game: {gameId}')
-            gameProcessed = process_game(repo, gameId)
-            print(f'Finished processing game: {gameId}')
-            gameId += 1
+        while game_processed:
+            print(f'Started processing game: {game_id}')
+            game_processed = process_game(repo, game_id)
+            print(f'Finished processing game: {game_id}')
+            game_id += 1
 
     print('\n\nFinished processing all played games')
 

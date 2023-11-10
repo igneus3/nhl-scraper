@@ -1,6 +1,6 @@
 class Player():
-    def __init__(self, playerId: int):
-        self.playerId = playerId
+    def __init__(self, player_id: int):
+        self.player_id = player_id
 
         self.assists = 0
         self.blocked_shots = 0
@@ -39,7 +39,7 @@ class Player():
         self.shots_on_goal += 1
         self.goals += 1
 
-    def add_save():
+    def add_save(self):
         self.saves += 1
 
     def add_shot_on_goal(self):
