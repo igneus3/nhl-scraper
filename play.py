@@ -38,8 +38,7 @@ def process_play(play, players):
 
         case PlayType.SHOT_ON_GOAL:
             update_player_stat(play, players, 'shootingPlayerId', 'add_shot_on_goal')
-            goalie = get_playerId_maybe(play, 'goalieInNetId')
-            # TODO: Add goalie stats
+            update_player_stat(play, players, 'goalieInNetId', 'add_save')
 
         case PlayType.TAKEAWAY:
             update_player_stat(play, players, 'playerId', 'add_takeaway')
@@ -51,8 +50,7 @@ def process_play(play, players):
 
         case PlayType.MISSED_SHOT:
             update_player_stat(play, players, 'shootingPlayerId', 'add_missed_shot')
-            goalie = get_playerId_maybe(play, 'goalieInNetId')
-            # TODO: Add goalie stats
+            update_player_stat(play, players, 'goalieInNetId', 'add_save')
 
         case PlayType.BLOCKED_SHOT:
             update_player_stat(play, players, 'shootingPlayerId', 'add_shot')
@@ -66,17 +64,14 @@ def process_play(play, players):
             update_player_stat(play, players, 'scoringPlayerId', 'add_goal')
             update_player_stat(play, players, 'assist1PlayerId', 'add_primary_assist')
             update_player_stat(play, players, 'assist2PlayerId', 'add_secondary_assist')
-            goalie = get_playerId_maybe(play, 'goalieInNetId')
-            # TODO: Add goalie stats
-            # if goalie is not None:
+            update_player_stat(play, players, 'goalieInNetId', 'add_save')
 
         case PlayType.GIVEAWAY:
             update_player_stat(play, players, 'playerId', 'add_giveaway')
 
         case PlayType.FAILED_SHOT_ATTEMPT:
             update_player_stat(play, players, 'shootingPlayerId', 'add_so_failed_shot')
-            goalie = get_playerId_maybe(play, 'goalieInNetId')
-            # TODO: Add goalie stats
+            update_player_stat(play, players, 'goalieInNetId', 'add_save')
 
         case PlayType.STOPPAGE | \
              PlayType.PERIOD_START | \

@@ -15,6 +15,7 @@ class Player():
         self.penalties_drawn = 0
         self.penalties_served = 0
         self.primary_assists = 0
+        self.saves = 0
         self.secondary_assists = 0
         self.shots = 0
         self.shots_on_goal = 0
@@ -37,6 +38,9 @@ class Player():
         self.shots += 1
         self.shots_on_goal += 1
         self.goals += 1
+
+    def add_save():
+        self.saves += 1
 
     def add_shot_on_goal(self):
         self.shots += 1

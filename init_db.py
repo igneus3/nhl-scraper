@@ -2,7 +2,7 @@ from argparse import ArgumentParser
 from pathlib import Path
 import sqlite3
 
-def drop_dbs():
+def delete_db():
     db_path = Path('nhl.db')
     db_path.unlink(missing_ok=True)
 
@@ -36,6 +36,7 @@ def initialize_db():
         penalties_drawn INTEGER DEFAULT 0,
         penalties_served INTEGER DEFAULT 0,
         primary_assists INTEGER DEFAULT 0,
+        saves INTEGER DEFAULT 0,
         secondary_assists INTEGER DEFAULT 0,
         shots INTEGER DEFAULT 0,
         shots_on_goal INTEGER DEFAULT 0,
@@ -59,11 +60,11 @@ def initialize_db():
 
 def main():
     parser = ArgumentParser('init_db_parser')
-    parser.add_argument('--drop-dbs', action='store_true', help='Setting this flag will first drop all databases!')
+    parser.add_argument('--empty', action='store_true', help='Setting this flag will erase all data!')
     args = parser.parse_args()
 
-    if args.drop_dbs:
-        drop_dbs()
+    if args.empty:
+        delete_db()
 
     initialize_db()
 
