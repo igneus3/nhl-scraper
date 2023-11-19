@@ -3,6 +3,7 @@ import requests
 
 from player import Player
 from play import process_play_with_logging
+from util import http_request
 
 class GameStateMeta(EnumMeta):
     def __contains__(cls, item):
@@ -20,14 +21,8 @@ class GameState(StrEnum, metaclass=GameStateMeta):
         PLAYED  = 'OFF'
 
 def get_game_data(game_id):
-    result = None
     url = f'https://api-web.nhle.com/v1/gamecenter/{game_id}/play-by-play'
-
-    response = requests.get(url)
-    if response.status_code == 200:
-        result = response.json()
-
-    return result
+    return http_request(url)
 
 def get_play_data(data):
     return data['plays']
