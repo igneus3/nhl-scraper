@@ -9,7 +9,8 @@ def delete_db():
 def initialize_db():
     games_table = """
     CREATE TABLE IF NOT EXISTS games(
-        id INTEGER PRIMARY KEY
+        id INTEGER PRIMARY KEY,
+        processed INTEGER NOT NULL
     )
     """
 
