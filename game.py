@@ -1,7 +1,23 @@
+from enum import EnumMeta, StrEnum
 import requests
 
 from player import Player
 from play import process_play_with_logging
+
+class GameStateMeta(EnumMeta):
+    def __contains__(cls, item):
+        try:
+            cls(item)
+        except ValueError:
+            return False
+        else:
+            return True
+
+class GameState(StrEnum, metaclass=GameStateMeta):
+        FINISHED = 'FINAL'
+        FUTURE = 'FUT'
+        LIVE = 'LIVE'
+        PLAYED  = 'OFF'
 
 def get_game_data(game_id):
     result = None
@@ -49,9 +65,16 @@ def process_game(repo, game_id):
         print("Game not found!")
         return False
 
-    if data['gameState'] == 'FUT':
-        print('Game no played yet!')
+    game_state = data['gameState']
+    if game_state not in list(GameState):
+        print('Unseen game state: {0}\nGame not processed!'.format(game_state))
         return False
+
+    game_played = game_state == 'OFF'
+    repo.insert_game(game_id, game_played)
+
+    if not game_played:
+        return True
 
     play_data = get_play_data(data)
     save_play_data(repo, game_id, play_data)
