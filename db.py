@@ -5,6 +5,7 @@ from player import Player
 class NhlRepository:
     def __init__(self):
         self.connection = sqlite3.connect('nhl.db')
+        self.connection.row_factory = sqlite3.Row
 
     def __enter__(self):
         return self
