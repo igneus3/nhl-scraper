@@ -10,6 +10,7 @@ def initialize_db():
     games_table = """
     CREATE TABLE IF NOT EXISTS games(
         id INTEGER PRIMARY KEY,
+        gameDate DATE NOT NULL,
         processed INTEGER NOT NULL
     )
     """

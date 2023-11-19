@@ -13,7 +13,7 @@ class NhlRepository:
 
     def __exit__(self, exec_type, exec_value, traceback):
         self.connection.close()
-
+    
     def __insert(self, statement, params):
         cursor = self.connection.cursor()
 
@@ -32,11 +32,11 @@ class NhlRepository:
 
         return result
 
-    def insert_game(self, game_id, played):
+    def insert_game(self, game_id, gameDate, processed):
         statement = """
-        INSERT INTO games(id, processed) VALUES (?, ?)
+        INSERT INTO games(id, gameDate, processed) VALUES (?, ?, ?)
         """
-        params = (game_id, played)
+        params = (game_id, gameDate, processed)
 
         self.__insert(statement, params)
 
@@ -45,6 +45,10 @@ class NhlRepository:
 
         return self.__find_one(query)
 
+    def get_latest_game(self):
+        query = 'SELECT id, processed, gameDate FROM games ORDER BY gameDate DESC'
+
+        return self.__find_one(query)
 
     def insert_player_game(self, game_id, player):
         statement = """
