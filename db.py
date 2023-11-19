@@ -13,7 +13,7 @@ class NhlRepository:
     def __exit__(self, exec_type, exec_value, traceback):
         self.connection.close()
 
-    def __execute_insert(self, statement, params):
+    def __insert(self, statement, params):
         cursor = self.connection.cursor()
 
         cursor.execute(statement, params)
@@ -47,7 +47,13 @@ class NhlRepository:
             so_failed_shot,
             so_shots,
             takeaways
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ) VALUES (
+            ?, ?, ?, ?, ?,
+            ?, ?, ?, ?, ?,
+            ?, ?, ?, ?, ?,
+            ?, ?, ?, ?, ?,
+            ?, ?
+        )
         """
         params = (
             game_id, player.player_id, player.assists, player.blocked_shots,
@@ -58,7 +64,7 @@ class NhlRepository:
             player.so_shots, player.takeaways
         )
 
-        self.__execute_insert(statement, params)
+        self.__insert(statement, params)
 
     def insert_play(self, game_id, play):
         statement = """
@@ -75,7 +81,10 @@ class NhlRepository:
             type_desc_key,
             details
         )
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        VALUES (
+            ?, ?, ?, ?, ?,
+            ?, ?, ?, ?, ?
+        )
         """
         params = (
            game_id, play['eventId'], play['period'], play['periodDescriptor']['periodType'],
@@ -88,5 +97,5 @@ class NhlRepository:
         else:
             params += (None,)
 
-        self.__execute_insert(statement, params)
+        self.__insert(statement, params)
 
