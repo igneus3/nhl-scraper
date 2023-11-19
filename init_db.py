@@ -29,7 +29,6 @@ def initialize_db():
         period_type TEXT NOT NULL,
         time_in_period TEXT NOT NULL,
         time_remaining TEXT NOT NULL,
-        home_team_defending_side TEXT NOT NULL,
         type_code INTEGER NOT NULL,
         type_desc_key TEXT NOT NULL,
         details TEXT,

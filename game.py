@@ -1,3 +1,4 @@
+from datetime import date
 from enum import EnumMeta, StrEnum
 import requests
 
@@ -65,9 +66,7 @@ def process_game(repo, game_id):
         print('Unseen game state: {0}\nGame not processed!'.format(game_state))
         return False
 
-    game_played = game_state == 'OFF'
-    repo.insert_game(game_id, game_played)
-
+    game_played = game_state == GameState.PLAYED or game_state == GameState.FINAL
     if not game_played:
         return True
 
@@ -79,3 +78,36 @@ def process_game(repo, game_id):
     save_player_data(repo, game_id, player_data)
 
     return True
+
+def process_games(repo):
+    today = date.today()
+
+    processed_a_game = False
+    has_played_games = True
+    while(has_played_games):
+        games = repo.get_unprocessed_games()
+
+        if games is None:
+            has_played_games = False
+            break;
+
+        for game in games:
+            if date.fromisoformat(game['gameDate']) >= today:
+                has_played_games = False
+                break
+
+            game_id = game['id']
+
+            print(f'Started processing game: {game_id}')
+            game_processed = process_game(repo, game_id)
+            if game_processed:
+                processed_a_game = True
+                repo.mark_game_processed(game_id)
+                print(f'Finished processing game: {game_id}')
+            else:
+                print(f'There was an issues processing game: {game_id}')
+
+    if processed_a_game:
+        print('\n\nFinished processing all played games')
+    else:
+        print('\n\nNo games needed processing')

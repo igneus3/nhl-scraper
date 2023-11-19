@@ -5,28 +5,38 @@ from player import Player
 
 class NhlRepository:
     def __init__(self):
-        self.connection = sqlite3.connect('nhl.db')
-        self.connection.row_factory = sqlite3.Row
+        self.__connection = sqlite3.connect('nhl.db')
+        self.__connection.row_factory = sqlite3.Row
 
     def __enter__(self):
         return self
 
     def __exit__(self, exec_type, exec_value, traceback):
-        self.connection.close()
+        self.__connection.close()
     
-    def __insert(self, statement, params):
-        cursor = self.connection.cursor()
+    def __execute(self, statement, params=()):
+        cursor = self.__connection.cursor()
 
         cursor.execute(statement, params)
-        self.connection.commit()
+        self.__connection.commit()
 
         cursor.close()
 
     def __find_one(self, query):
-        cursor = self.connection.cursor()
+        cursor = self.__connection.cursor()
 
         records = cursor.execute(query) 
         result = records.fetchone()
+
+        cursor.close()
+
+        return result
+
+    def __find_many(self, query):
+        cursor = self.__connection.cursor()
+
+        records = cursor.execute(query)
+        result = records.fetchmany()
 
         cursor.close()
 
@@ -38,17 +48,29 @@ class NhlRepository:
         """
         params = (game_id, gameDate, processed)
 
-        self.__insert(statement, params)
+        self.__execute(statement, params)
 
     def get_game(self, game_id):
         query = 'SELECT id, processed  FROM GAMES WHERE id = {0}'.format(game_id)
 
         return self.__find_one(query)
 
-    def get_latest_game(self):
+    def get_latest_game(self, only_unprocessed=False):
         query = 'SELECT id, processed, gameDate FROM games ORDER BY gameDate DESC'
 
         return self.__find_one(query)
+
+    def get_unprocessed_games(self, limit = 100):
+        query = 'SELECT id, gameDate FROM games WHERE processed = FALSE ORDER BY gameDate ASC LIMIT {0}'.format(limit)
+
+        result = self.__find_many(query)
+
+        return None if result == [] else result
+
+    def mark_game_processed(self, game_id):
+        query = "UPDATE games SET processed = TRUE WHERE id = '{0}'".format(game_id)
+
+        return self.__execute(query)
 
     def insert_player_game(self, game_id, player):
         statement = """
@@ -93,7 +115,7 @@ class NhlRepository:
             player.so_shots, player.takeaways
         )
 
-        self.__insert(statement, params)
+        self.__execute(statement, params)
 
     def insert_play(self, game_id, play):
         statement = """
@@ -105,19 +127,18 @@ class NhlRepository:
             period_type,
             time_in_period,
             time_remaining,
-            home_team_defending_side,
             type_code,
             type_desc_key,
             details
         )
         VALUES (
             ?, ?, ?, ?, ?,
-            ?, ?, ?, ?, ?
+            ?, ?, ?, ?
         )
         """
         params = (
            game_id, play['eventId'], play['period'], play['periodDescriptor']['periodType'],
-           play['timeInPeriod'], play['timeRemaining'], play['homeTeamDefendingSide'], play['typeCode'],
+           play['timeInPeriod'], play['timeRemaining'], play['typeCode'],
            play['typeDescKey']
         )
 
@@ -126,7 +147,7 @@ class NhlRepository:
         else:
             params += (None,)
 
-        self.__insert(statement, params)
+        self.__execute(statement, params)
 
 
 
