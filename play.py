@@ -1,5 +1,7 @@
 from enum import IntEnum
 
+from player import Player
+
 class PlayNotFoundError(Exception):
     pass
 
@@ -27,6 +29,8 @@ def update_player_stat(play, players, player_key, player_update_func):
         player_id = play['details'][player_key]
 
     if player_id is not None:
+        if player_id not in players:
+            players[player_id] = Player(player_id)
         players[player_id].call(player_update_func)
 
 def process_play(play, players):
@@ -94,4 +98,8 @@ def process_play_with_logging(play, players):
         e.add_note('TypeCode = {0}'.format(play['typeCode']))
         e.add_note('Desc = {0}'.format(play['typeDescKey']))
         e.add_note('Event ID = {0}'.format(play['eventId']))
+        raise e
+    except Exception as e:
+        e.add_note('Play = {0}'.format(play))
+        e.add_note('Players = {0}'.format(players))
         raise e
