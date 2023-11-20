@@ -1,7 +1,7 @@
 from datetime import date, timedelta
 import requests
 
-from util import http_request
+from util import http_request_with_retry
 
 def get_latest_game(repo):
     result = repo.get_latest_game(); 
@@ -14,7 +14,7 @@ def get_latest_game(repo):
 
 def get_schedule(current_date):
     url = f'https://api-web.nhle.com/v1/schedule/{current_date}'
-    return http_request(url)
+    return http_request_with_retry(url)
 
 def process_schedule(repo, schedule):
     result = 0
@@ -51,5 +51,10 @@ def load_scheduled_games(repo):
 
         added_games = process_schedule(repo, schedule)
 
-        print('Week of {0} => Added {1} games'.format(schedule['nextStartDate'], added_games))
+        print('Week of {0} => Added {1} games'.format(current_date, added_games))
+
+        if 'nextStartDate' not in schedule:
+            print('Finished processing all scheduled games!')
+            return
+
         current_date = date.fromisoformat(schedule['nextStartDate'])

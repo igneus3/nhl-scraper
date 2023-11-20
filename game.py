@@ -4,7 +4,7 @@ import requests
 
 from player import Player
 from play import process_play_with_logging
-from util import http_request
+from util import http_request_with_retry
 
 class GameStateMeta(EnumMeta):
     def __contains__(cls, item):
@@ -23,7 +23,7 @@ class GameState(StrEnum, metaclass=GameStateMeta):
 
 def get_game_data(game_id):
     url = f'https://api-web.nhle.com/v1/gamecenter/{game_id}/play-by-play'
-    return http_request(url)
+    return http_request_with_retry(url)
 
 def get_play_data(data):
     return data['plays']
@@ -66,7 +66,7 @@ def process_game(repo, game_id):
         print('Unseen game state: {0}\nGame not processed!'.format(game_state))
         return False
 
-    game_played = game_state == GameState.PLAYED or game_state == GameState.FINAL
+    game_played = game_state == GameState.PLAYED or game_state == GameState.FINISHED
     if not game_played:
         return True
 
