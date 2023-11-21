@@ -1,0 +1,7 @@
+services:
+  main:
+    build: .
+    volumes:
+      - ./db:/db
+      - ./logs:/logs
+
