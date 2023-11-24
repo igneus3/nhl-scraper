@@ -42,26 +42,26 @@ class NhlRepository:
 
         return result
 
-    def insert_game(self, game_id, gameDate, processed):
+    def insert_game(self, game_id, gameDate, season, processed):
         statement = """
-        INSERT INTO games(id, gameDate, processed) VALUES (?, ?, ?)
+        INSERT INTO games(id, gameDate, season, processed) VALUES (?, ?, ?, ?)
         """
-        params = (game_id, gameDate, processed)
+        params = (game_id, gameDate, season, processed)
 
         self.__execute(statement, params)
 
     def get_game(self, game_id):
-        query = 'SELECT id, processed  FROM GAMES WHERE id = {0}'.format(game_id)
+        query = 'SELECT id, season, processed  FROM GAMES WHERE id = {0}'.format(game_id)
 
         return self.__find_one(query)
 
     def get_latest_game(self, only_unprocessed=False):
-        query = 'SELECT id, processed, gameDate FROM games ORDER BY gameDate DESC'
+        query = 'SELECT id, season, processed, gameDate FROM games ORDER BY gameDate DESC'
 
         return self.__find_one(query)
 
     def get_unprocessed_games(self, limit = 100):
-        query = 'SELECT id, gameDate FROM games WHERE processed = FALSE ORDER BY gameDate ASC LIMIT {0}'.format(limit)
+        query = 'SELECT id, gameDate, season FROM games WHERE processed = FALSE ORDER BY gameDate ASC LIMIT {0}'.format(limit)
 
         result = self.__find_many(query)
 

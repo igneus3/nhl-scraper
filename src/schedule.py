@@ -7,7 +7,7 @@ def get_latest_game(repo):
     result = repo.get_latest_game(); 
     if result == None:
         result = {
-            'gameDate' : '1980-09-01'
+            'gameDate' : '2003-09-01'
         }
 
     return result
@@ -30,7 +30,7 @@ def process_schedule(repo, schedule):
             if game_exists:
                 continue
 
-            repo.insert_game(game_id, day['date'], False)
+            repo.insert_game(game_id, game['season'],  day['date'], False)
             result += 1
 
     return result
