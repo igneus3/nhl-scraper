@@ -4,8 +4,8 @@ import sqlite3
 from player import Player
 
 class NhlRepository:
-    def __init__(self):
-        self.__connection = sqlite3.connect('../db/nhl.db')
+    def __init__(self, path):
+        self.__connection = sqlite3.connect(path)
         self.__connection.row_factory = sqlite3.Row
 
     def __enter__(self):

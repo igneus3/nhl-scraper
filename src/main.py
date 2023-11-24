@@ -1,3 +1,4 @@
+from argparse import ArgumentParser
 from datetime import date
 import sqlite3
 
@@ -18,12 +19,16 @@ def register_adapters_converter():
 # TODO: Remane this
                   
 def main():
+    parser = ArgumentParser('main_parser')
+    parser.add_argument('--path', default='db/nhl.db', help='Set the path for the database file.')
+    args = parser.parse_args()
+
     register_adapters_converter()
 
-    with NhlRepository() as repo:
+    with NhlRepository(args.path) as repo:
         load_scheduled_games(repo)
 
-        process_games(repo) 
+        #process_games(repo) 
 
 if __name__ == '__main__':
     main()

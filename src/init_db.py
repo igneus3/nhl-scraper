@@ -2,14 +2,15 @@ from argparse import ArgumentParser
 from pathlib import Path
 import sqlite3
 
-def delete_db():
-    db_path = Path('nhl.db')
+def delete_db(path):
+    db_path = Path(path)
     db_path.unlink(missing_ok=True)
 
-def initialize_db():
+def initialize_db(path):
     games_table = """
     CREATE TABLE IF NOT EXISTS games(
         id INTEGER PRIMARY KEY,
+        season INTEGER NOT NULL,
         gameDate DATE NOT NULL,
         processed INTEGER NOT NULL
     )
@@ -68,7 +69,7 @@ def initialize_db():
 
     tables = [games_table, players_table, plays_table, player_games_table]
 
-    con = sqlite3.connect('nhl.db')
+    con = sqlite3.connect(path)
     cur = con.cursor()
 
     for table in tables:
@@ -77,14 +78,16 @@ def initialize_db():
     con.close()
 
 def main():
+    from argparse import ArgumentParser
     parser = ArgumentParser('init_db_parser')
+    parser.add_argument('--path', default='db/nhl.db', help='Set the path for the database file.')
     parser.add_argument('--empty', action='store_true', help='Setting this flag will erase all data!')
     args = parser.parse_args()
 
     if args.empty:
-        delete_db()
+        delete_db(args.path)
 
-    initialize_db()
+    initialize_db(args.path)
 
 if __name__ == '__main__':
     main()
