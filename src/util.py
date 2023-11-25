@@ -10,7 +10,10 @@ def http_request(url):
     sleep(.500)
     response = requests.get(url)
     if response.status_code == 200:
-        result = response.json()
+        if response.headers.get('content-type') == 'application/json':
+            result = response.json()
+        else:
+            result = response.text
 
     return result
 
