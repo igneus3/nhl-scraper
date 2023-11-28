@@ -1,5 +1,7 @@
 from datetime import date
 from enum import EnumMeta, StrEnum
+import os
+import pickle
 import requests
 
 from player import Player
@@ -21,12 +23,22 @@ class GameState(StrEnum, metaclass=GameStateMeta):
         LIVE = 'LIVE'
         PLAYED  = 'OFF'
 
-def get_game_data(game_id):
-    url = f'https://api-web.nhle.com/v1/gamecenter/{game_id}/play-by-play'
+def download_game_data(game_id, season):
+    url = f'https://www.nhl.com/scores/htmlreports/{season}/PL{str(game_id)[4:]}.HTM'
+    #url = f'https://www.nhl.com/scores/htmlreports/20072008/PL020001.HTM'
     return http_request_with_retry(url)
 
-def get_play_data(data):
-    return data['plays']
+def get_game_data(game_id, season):
+    path = f'data/games/{season}/{game_id}.pkl'
+    if os.path.isfile(path):
+        with open(path, 'rb') as file:
+            return pickle.load(file)
+
+    dl_game = download_game_data(game_id, season)
+    with open(path, 'wb') as file:
+        pickle.dump(dl_game, file)
+
+    return dl_game
 
 def save_play_data(repo, game_id, plays):
     for play in plays:
@@ -54,8 +66,8 @@ def save_player_data(repo, game_id, players):
     for _, player in players.items():
         repo.insert_player_game(game_id, player)
 
-def process_game(repo, game_id):
-    data = get_game_data(game_id)
+def process_game(repo, game_id, season):
+    data = get_game_data(game_id, season)
         
     if data is None:
         print("Game not found!")
@@ -99,7 +111,7 @@ def process_games(repo):
             game_id = game['id']
 
             print(f'Started processing game: {game_id}')
-            game_processed = process_game(repo, game_id)
+            game_processed = process_game(repo, game_id, game['season'])
             if game_processed:
                 processed_a_game = True
                 repo.mark_game_processed(game_id)

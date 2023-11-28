@@ -1,4 +1,6 @@
 from datetime import date, timedelta
+import os
+import pickle
 import requests
 
 from util import http_request_with_retry
@@ -12,9 +14,28 @@ def get_latest_game(repo):
 
     return result
 
-def get_schedule(current_date):
+def download_schedule(current_date):
     url = f'https://api-web.nhle.com/v1/schedule/{current_date}'
     return http_request_with_retry(url)
+
+def get_schedule(current_date):
+    path = f'data/schedules/{current_date}.pkl'
+    if os.path.isfile(path):
+        with open(path, 'rb') as file:
+            return pickle.load(file)
+
+    schedule = download_schedule(current_date)
+    with open(path, 'wb') as file:
+        pickle.dump(schedule, file)
+
+    return schedule
+
+def setup_folder(season):
+    path = f'data/games/{season}'
+    if os.path.isdir(path):
+        return
+
+    os.makedirs(path)
 
 def process_schedule(repo, schedule):
     result = 0
@@ -32,6 +53,8 @@ def process_schedule(repo, schedule):
 
             repo.insert_game(game_id, game['season'],  day['date'], False)
             result += 1
+
+            setup_folder(game['season'])
 
     return result
 
