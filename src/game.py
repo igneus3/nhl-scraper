@@ -1,5 +1,6 @@
 from datetime import date
 from enum import EnumMeta, StrEnum
+from logging import info, warn
 import os
 import pickle
 import requests
@@ -70,12 +71,12 @@ def process_game(repo, game_id, season):
     data = get_game_data(game_id, season)
         
     if data is None:
-        print("Game not found!")
         return False
+        warn(f'Game {game_id} not found!')
 
     game_state = data['gameState']
     if game_state not in list(GameState):
-        print('Unseen game state: {0}\nGame not processed!'.format(game_state))
+        info('Unseen game state: {0}\nGame not processed!'.format(game_state))
         return False
 
     game_played = game_state == GameState.PLAYED or game_state == GameState.FINISHED
@@ -110,16 +111,16 @@ def process_games(repo):
 
             game_id = game['id']
 
-            print(f'Started processing game: {game_id}')
+            info(f'Started processing game: {game_id}')
             game_processed = process_game(repo, game_id, game['season'])
             if game_processed:
                 processed_a_game = True
                 repo.mark_game_processed(game_id)
-                print(f'Finished processing game: {game_id}')
+                info(f'Finished processing game: {game_id}')
             else:
-                print(f'There was an issues processing game: {game_id}')
+                warn(f'There was an issues processing game: {game_id}')
 
     if processed_a_game:
-        print('\n\nFinished processing all played games')
+        info('\n\nFinished processing all played games')
     else:
-        print('\n\nNo games needed processing')
+        info('\n\nNo games needed processing')

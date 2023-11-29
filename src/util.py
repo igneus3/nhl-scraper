@@ -30,10 +30,10 @@ def http_request_with_retry(url, retry_attempts=3):
         except Exception as e:
             count += 1
 
-            error(f'{datetime.now()} {type(e).__name__} error occurred when making HTTP request. Retrying request. Retry attempt {count}/{retry_attempts}.')
+            error(f'{type(e).__name__}\terror occurred when making HTTP request. Retrying request. Retry attempt {count}/{retry_attempts}.')
 
             if count >= retry_attempts:
-                error(f'{datetime.now()} All retry attempts failed.  Aborting.')
+                error(f'All retry attempts failed.  Aborting.')
                 raise e
 
     return result

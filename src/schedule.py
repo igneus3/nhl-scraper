@@ -1,4 +1,5 @@
 from datetime import date, timedelta
+from logging import info
 import os
 import pickle
 import requests
@@ -74,10 +75,10 @@ def load_scheduled_games(repo):
 
         added_games = process_schedule(repo, schedule)
 
-        print('Week of {0} => Added {1} games'.format(current_date, added_games))
+        info('Week of {0} => Added {1} games'.format(current_date, added_games))
 
         if 'nextStartDate' not in schedule:
-            print('Finished processing all scheduled games!')
+            info('Finished processing all scheduled games!')
             return
 
         current_date = date.fromisoformat(schedule['nextStartDate'])
