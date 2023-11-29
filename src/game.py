@@ -5,6 +5,7 @@ import os
 import pickle
 import requests
 
+from game_parser import GameParser
 from player import Player
 from play import process_play_with_logging
 from util import http_request_with_retry
@@ -26,24 +27,34 @@ class GameState(StrEnum, metaclass=GameStateMeta):
 
 def download_game_data(game_id, season):
     url = f'https://www.nhl.com/scores/htmlreports/{season}/PL{str(game_id)[4:]}.HTM'
-    #url = f'https://www.nhl.com/scores/htmlreports/20072008/PL020001.HTM'
     return http_request_with_retry(url)
 
 def get_game_data(game_id, season):
-    path = f'data/games/{season}/{game_id}.pkl'
+    path = f'data/games/{season}/{game_id}.html'
     if os.path.isfile(path):
-        with open(path, 'rb') as file:
-            return pickle.load(file)
+        with open(path, mode='r', encoding='utf-8') as file:
+            file_game = file.read()
+            if file_game == '':
+                return None
+            else:
+                return file_game
 
     dl_game = download_game_data(game_id, season)
-    with open(path, 'wb') as file:
-        pickle.dump(dl_game, file)
+    with open(path, mode='w', encoding='utf-8') as file:
+        if dl_game is None:
+            file.write('')
+        else:
+            file.write(dl_game)
 
     return dl_game
 
 def save_play_data(repo, game_id, plays):
     for play in plays:
-        repo.insert_play(game_id, play)
+        try:
+            repo.insert_play(game_id, play)
+        except Exception as e:
+            e.add_note(f'{game_id} => {play}')
+            raise e
 
 def get_players(data):
     return data['rosterSpots']
@@ -69,12 +80,19 @@ def save_player_data(repo, game_id, players):
 
 def process_game(repo, game_id, season):
     data = get_game_data(game_id, season)
-        
-    if data is None:
-        return False
-        warn(f'Game {game_id} not found!')
 
-    game_state = data['gameState']
+    if data is None:
+        warn(f'Game {game_id} not found!')
+        return True
+
+    game_parser = GameParser(data, game_id)
+
+    game_state = game_parser.get_game_state()
+
+    if game_state is None:
+        warn(f'{game_id}\tGame file was invalid.')
+        return True
+
     if game_state not in list(GameState):
         info('Unseen game state: {0}\nGame not processed!'.format(game_state))
         return False
@@ -83,12 +101,12 @@ def process_game(repo, game_id, season):
     if not game_played:
         return True
 
-    play_data = get_play_data(data)
+    play_data = game_parser.get_play_data()
     save_play_data(repo, game_id, play_data)
 
-    players = get_players(data)
-    player_data = build_player_data(play_data, players)
-    save_player_data(repo, game_id, player_data)
+    #players = get_players(data)
+    #player_data = build_player_data(play_data, players)
+    #save_player_data(repo, game_id, player_data)
 
     return True
 

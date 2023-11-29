@@ -17,8 +17,13 @@ class NhlRepository:
     def __execute(self, statement, params=()):
         cursor = self.__connection.cursor()
 
-        cursor.execute(statement, params)
-        self.__connection.commit()
+        try:
+            cursor.execute(statement, params)
+            self.__connection.commit()
+        except sqlite3.IntegrityError as e:
+            e.add_note(statement)
+            e.add_note(str(params))
+            raise e
 
         cursor.close()
 
@@ -36,7 +41,7 @@ class NhlRepository:
         cursor = self.__connection.cursor()
 
         records = cursor.execute(query)
-        result = records.fetchmany()
+        result = records.fetchall()
 
         cursor.close()
 
@@ -44,7 +49,7 @@ class NhlRepository:
 
     def insert_game(self, game_id, gameDate, season, processed):
         statement = """
-        INSERT INTO games(id, gameDate, season, processed) VALUES (?, ?, ?, ?)
+        INSERT INTO games(id, season, gameDate, processed) VALUES (?, ?, ?, ?)
         """
         params = (game_id, gameDate, season, processed)
 
@@ -122,30 +127,23 @@ class NhlRepository:
         INSERT INTO plays
         (
             game_id,
-            event_id,
+            id,
+            event,
             period,
-            period_type,
-            time_in_period,
-            time_remaining,
-            type_code,
-            type_desc_key,
-            details
+            time,
+            type,
+            team,
+            description
         )
         VALUES (
-            ?, ?, ?, ?, ?,
+            ?, ?, ?, ?,
             ?, ?, ?, ?
         )
         """
         params = (
-           game_id, play['eventId'], play['period'], play['periodDescriptor']['periodType'],
-           play['timeInPeriod'], play['timeRemaining'], play['typeCode'],
-           play['typeDescKey']
+           game_id, play.id, play.event, play.period,
+           play.time, play.type, play.team, play.description
         )
-
-        if 'details' in play:
-            params += (json.dumps(play['details']),)
-        else:
-            params += (None,)
 
         self.__execute(statement, params)
 

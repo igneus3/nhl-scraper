@@ -18,11 +18,15 @@ The app currently will retry processing games if there were any errors when requ
 
 Here I have a general list of next items I am thinking about tackling.
 
-- [ ] Calculate stats for players per season
-- [ ] Calculate overall stats for players
-- [ ] Update the logging statements to a uniformed format using the Python logging features
-- [ ] Add in some environment variables for database and log locations for running in a Docker container
+- [X] Update the logging statements to a uniformed format using the Python logging features
+- [X] Add in some environment variables for database location for running in a Docker container
+- [X] Update logging to a uniformed format
+- [X] Add in HTTP request retry logic
+- [X] Swap from NHL Edge API to HTML Reports
 - [ ] Update processed game states to handle resuming processing if the app execution was interrupted
+- [ ] Add in logic for handling player plus/minus stats
+- [ ] Calculate overall stats for players
+- [ ] Calculate stats for players per season
 
 ### Getting started
 
@@ -45,7 +49,7 @@ Initialize the database.
 Note: You can always recreate a fresh, empty database by passing the `--empty` flag to the `init_db.py` script.
 
 ```sh
-> python src/init_db.py
+> python src/init_db.py --empty
 ```
 
 Finally, you can run the script by executing the `main.py` file.
@@ -55,3 +59,4 @@ Finally, you can run the script by executing the `main.py` file.
 ```
 
 Note: This will take some time to run, likely measured in hours.
+

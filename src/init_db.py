@@ -25,16 +25,16 @@ def initialize_db(path):
     plays_table = """
     CREATE TABLE IF NOT EXISTS plays(
         game_id INTEGER REFERENCES games(id),
-        event_id INTEGER NOT NULL,
-        period INTEGER NOT NULL,
-        period_type TEXT NOT NULL,
-        time_in_period TEXT NOT NULL,
-        time_remaining TEXT NOT NULL,
-        type_code INTEGER NOT NULL,
-        type_desc_key TEXT NOT NULL,
-        details TEXT,
+        id INTEGER REFERENCES games(id),
+        id_offset INTEGER,
+        event TEXT,
+        period INTEGER,
+        time TEXT,
+        type TEXT NOT NULL,
+        team TEXT,
+        description TEXT,
 
-        PRIMARY KEY (game_id, event_id)
+        PRIMARY KEY (game_id, id)
     )
     """
 

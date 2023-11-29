@@ -7,13 +7,14 @@ import requests
 from util import http_request_with_retry
 
 def get_latest_game(repo):
-    result = repo.get_latest_game(); 
+    result = repo.get_latest_game()
     if result == None:
         result = {
-            'gameDate' : '2003-09-01'
+            'gameDate' : '2007-09-29'
         }
 
     return result
+       
 
 def download_schedule(current_date):
     url = f'https://api-web.nhle.com/v1/schedule/{current_date}'
@@ -47,6 +48,11 @@ def process_schedule(repo, schedule):
 
         for game in day['games']:
             game_id = game['id']
+
+            # Skip preseason games
+            if str(game_id)[5] == '1':
+                continue
+
             game_exists = repo.get_game(game_id) != None
 
             if game_exists:
